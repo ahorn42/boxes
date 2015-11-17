@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>boxes</title>
+
+    <style type="text/css">
+        * {
+            font-family: sans-serif;
+        }
+
+        #svgCanvas {
+            border: 1px solid black;
+            /*width: 100%;
+            height: 60em;*/
+        }
+    </style>
+
+    <script type="text/javascript">
+        var box;
+
+        var masurementsDiv;
+
+        function newElement(type, attributes, text) {
+            var elem = document.createElement(type);
+            var attrs = attributes || {};
+
+            for (var attr in attrs) {
+                elem.setAttribute(attr, attrs[attr]);
+            }
+
+            if (text !== undefined) {
+                var txt = document.createTextNode(text);
+                elem.appendChild(txt);
+            }
+
+            return elem;
+        }
+
+        function newElementNS(namespace, type, attributes, text) {
+            var elem = document.createElementNS(namespace, type);
+            var attrs = attributes || {};
+
+            for (var attr in attrs) {
+                elem.setAttribute(attr, attrs[attr]);
+            }
+
+            if (text !== undefined) {
+                var txt = document.createTextNode(text);
+                elem.appendChild(txt);
+            }
+
+            return elem;
+        }
+
+        function newSVGElement(type, attributes) {
+            return newElementNS("http://www.w3.org/2000/svg", type, attributes);
+        }
+
+        function part(value, percentage) {
+            return value * percentage / 100;
+        }
+
+        function SimpleBox() {
+            this.materialThickness;
+            this.innerHeight;
+            this.innerWidth;
+            this.innerDepth;
+
+            this.initMeasurmentsForm = function (parentHTML) {
+                var table = newElement("table");
+
+                var tr0 = newElement("tr");
+                var tdT0 = newElement("td", {}, "material thickness");
+                var tdT1 = newElement("td");
+                var inpT = newElement("input", {type: "input", id: "inpThickness", value: 2});
+
+                var tr1 = newElement("tr");
+                var tdH0 = newElement("td", {}, "height");
+                var tdH1 = newElement("td");
+                var inpH = newElement("input", {type: "input", id: "inpHeight", value: 24});
+                var inpHI = newElement("input", {type: "checkbox", id: "inpUseInnerHeight"});
+                var labHI = newElement("label", {for: "inpUseInnerHeight"}, "use as outer height");
+
+                var tr2 = newElement("tr");
+                var tdW0 = newElement("td", {}, "width");
+                var tdW1 = newElement("td");
+                var inpW = newElement("input", {type: "input", id: "inpWidth", value: 120});
+                var inpWI = newElement("input", {type: "checkbox", id: "inpUseInnerWidth"});
+                var labWI = newElement("label", {for: "inpUseInnerWidth"}, "use as outer width");
+
+                var tr3 = newElement("tr");
+                var tdD0 = newElement("td", {}, "depth");
+                var tdD1 = newElement("td");
+                var inpD = newElement("input", {type: "input", id: "inpDepth", value: 70});
+                var inpDI = newElement("input", {type: "checkbox", id: "inpUseInnerDepth"});
+                var labDI = newElement("label", {for: "inpUseInnerDepth"}, "use as outer depth");
+
+                var tr4 = newElement("tr");
+                var tdS0 = newElement("td", {}, "minimum sheet size");
+                var tdS1 = newElement("td");
+                var span = newElement("span", {id: "minSheetSize"});
+
+                tr0.appendChild(tdT0);
+                tdT1.appendChild(inpT);
+                tr0.appendChild(tdT1);
+                table.appendChild(tr0);
+
+                tr1.appendChild(tdH0);
+                tdH1.appendChild(inpH);
+                tdH1.appendChild(inpHI);
+                tdH1.appendChild(labHI);
+                tr1.appendChild(tdH1);
+                table.appendChild(tr1);
+
+                tr2.appendChild(tdW0);
+                tdW1.appendChild(inpW);
+                tdW1.appendChild(inpWI);
+                tdW1.appendChild(labWI);
+                tr2.appendChild(tdW1);
+                table.appendChild(tr2);
+
+                tr3.appendChild(tdD0);
+                tdD1.appendChild(inpD);
+                tdD1.appendChild(inpDI);
+                tdD1.appendChild(labDI);
+                tr3.appendChild(tdD1);
+                table.appendChild(tr3);
+
+                tr4.appendChild(tdS0);
+                tdS1.appendChild(span);
+                tr4.appendChild(tdS1);
+                table.appendChild(tr4);
+
+                parentHTML.appendChild(table);
+            }
+
+            this.draw = function () {
+                document.getElementById("svgCanvas").innerHTML = "";
+
+                // todo: check if input is valid
+                var ih = Number(this.innerHeight = document.getElementById("inpHeight").value);
+                var iw = Number(this.innerWidth = document.getElementById("inpWidth").value);
+                var id = Number(this.innerDepth = document.getElementById("inpDepth").value);
+                var mt = Number(this.materialThickness = document.getElementById("inpThickness").value);
+
+                console.log("drawing");
+
+
+                // radii
+                var r1  = mt / 2;
+                var r2  = part(ih, 20);
+                var r3  = part(ih, 33);
+
+                // spaces
+                var s1 = mt / 2;
+
+                // lengths
+                var l1  = iw;
+                var l2  = iw - 2 * part(iw, 5);
+                var l3  = iw + 2 * mt; // todo: länge passt noch nicht
+                var l4  = id;
+                var l10 = l4 - 4 * r2;
+                var l5  = mt;
+                var l6  = ih;
+                var l7  = ih - part(mt, 150);
+                var l8  = id + 2 * mt;
+                var l9  = l8 / 2;
+                var l11 = l6 + mt;
+                var l12 = l9 - l11 - 2 * s1;//  - mt; todo: köntne mit dem problem bei l3 zusammenhängen
+                var l13 = ih + 2 * mt;
+                var l14 = id;
+                var l15 = l14 / 3;
+                var l16 = part(mt, 150);
+
+                var svgOrigen = {x: 350, y: (ih + 10)};
+
+                this.maxSheetWidth = 2 * (l16 + l13 + (l9 - l12)) + l3;
+                this.maxSheetHeight = l6 + l4 + mt + l6 + l8 + l6;
+
+                console.log("minimum required sheet size: " + this.maxSheetWidth + " x " + this.maxSheetHeight);
+                document.getElementById("minSheetSize").textContent = this.maxSheetWidth + "mm x " + this.maxSheetHeight + "mm";
+
+                var pathDataCut = "m " + svgOrigen.x + " " + svgOrigen.y +
+                        "l " + part(ih, 9) + " -" + part(ih, 90) + " " +
+                        "q " + part(ih, 1) + " -" + part(ih, 10) + " "+part(ih, 11) + " -"+part(ih, 10)+" " +
+                        "h " + (iw - 2*part(ih, 11 + 9)) + " " +
+                        "q 10 0 11 10 " +
+                        "l 9 90";
+
+                pathDataCut = "m " + svgOrigen.x + " " + svgOrigen.y +
+                        // Lasche oben
+                        "l " + (((l1-l2) / 2) - r1) + " -" + (l6 - r1) + " " +
+                        "q " + 0 + " -" + r1 + " " + r1 + " -" + r1 + " " +
+                        "h " + l2 + " " +
+                        "q " + r1 + " " + 0 + " " + r1 + " " + r1 + " " +
+                        "l " + (((l1-l2) / 2) - r1) + " " + (l6 - r1) + "\n" +
+                        // Lasche oben rechts
+                        "l " + (l6 - r2) + " " + (((l4 - l10) / 2) - r2) + " " +
+                        "q " + r2 + " " + 0 + " " + r2 + " " + r2 + " " +
+                        "v " + l10 + " " +
+                        "q " + 0 + " " + r2 + " -" + r2 + " " + r2 + " " +
+                        "l -" + (l6- r2) + " " + (((l4 - l10) / 2) - r2) + "\n" +
+                        // Übergang zu zweiter Lasche von oben rechts
+                        "v " + mt + "\n" +
+                        // zweite Lasche von oben rechts
+                        "h " + (l9-r1) + " " +
+                        "q " + r1 + " " + 0 + " " + r1 + " " + r1 + " " +
+                        "v " + (l7-2*r1) + " " +
+                        "q " + 0 + " " + r1 + " -" + r1 + " " + r1 + " " +
+                        "l -" + (l12-r1-mt) + " " + (l6 - l7) + " " +
+                        "h -" + (l11 + mt) + " " +
+                        "m " + (l11 + mt) + " " + 0 + "\n" +
+                        // Übergang zu dritter Lasche von oben rechts
+                        "v " + (mt-r1) + " " +
+                        "q " + 0 + " " + r1 + " " + r1 + " " + r1 + "\n" +
+                        // dritte Lasche von oben rechts
+                        "h " + (l13 - 2*r1) + " " +
+                        "q " + r1 + " " + 0 + " " + r1 + " " + r1 + " " +
+                        "v " + (l15 - r1) + " " +
+                        "l " + l16 + " " + l16 + " " +
+                        "v " + (l15 - 2*l16) + " " +
+                        "l -" + l16 + " " + l16 + " " +
+                        "v " + (l15 - r1) + " " +
+                        "q " + 0 + " " + r1 + " -" + r1 + " " + r1 + " " +
+                        "h -" + (l13 - 2*r1) + "\n" +
+                        // Übergang zu vierter Lasche von oben rechts
+                        "q -" + r1 + " " + 0 + " -" + r1 + " " + r1 + " " +
+                        "v " + (mt-r1) + "\n" +
+                        // vierte Lasche von oben rechts
+                        "h -" + (l11 + mt) + " " +
+                        "m " + (l11 + mt) + " " + 0 + " " +
+                        "l " + (l12 - r1 - mt) + " " + (l6 - l7) + " " +
+                        "q " + r1 + " " + 0 + " " + r1 + " " + r1 + " " +
+                        "v " + (l7 - 2*r1) + " " +
+                        "q " + 0 + " " + r1 + " -" + r1 + " " + r1 + " " +
+                        "h -" + (l9 - r1) + "\n" +
+                        // Übergang rechts nach links
+                        "h -" + ((l3 - 2*mt) / 2 - r3) + " " +
+                        "a " + r3 + " " + r3 + " 0 0 0 -" + 2*r3 + " " + 0 + " " +
+                        "h -" + ((l3 - 2*mt) / 2 - r3)+ "\n" +
+                        // vierte Lasche von oben links
+                        "h -" + (l9 - r1) + " " +
+                        "q -" + r1 + " " + 0 + " -" + r1 + " -" + r1 + " " +
+                        "v -" + (l7 - 2*r1) + " " +
+                        "q " + 0 + " -" + r1 + " " + r1 + " -" + r1 + " " +
+                        "l " + (l12 - r1 - mt) + " -" + (l6 - l7) + " " +
+                        "h " + (l11 + mt) + " " +
+                        "m -" + (l11 + mt) + " " + 0 + "\n" +
+                        // Übergang zu dritter Lasche von oben links
+                        "v -" + (mt - r1) + "\n" +
+                        "q " + 0 + " -" + r1 + " -" + r1 + " -" + r1 + "\n" +
+                        // dritte Lasche von oben links
+                        "h -" + (l13 - 2*r1) + " " +
+                        "q -" + r1 + " " + 0 + " -" + r1 + " -" + r1 + " " +
+                        "v -" + (l15 - r1) + " " +
+                        "l -" + l16 + " -" + l16 + " " +
+                        "v -" + (l15 - 2* l16) + " " +
+                        "l " + l16 + " -" + l16 + " " +
+                        "v -" + (l15 - r1) + " " +
+                        "q " + 0 + " -" + r1 + " " + r1 + " -" + r1 + " " +
+                        "h " + (l13 - 2*r1) + "\n" +
+                        // übergang zu zweiter Laschen von oben links
+                        "q " + r1 + " " + 0 + " " + r1 + " -" + r1 + " " +
+                        "v -" + (mt - r1) + "\n" +
+                        // zweite Lasche von oben links
+                        "h " + (l11 + mt) + " " +
+                        "m -" + (l11 + mt) + " " + 0 + " " +
+                        "l -" + (l12 - r1 - mt) + " -" + (l6 - l7) + " " +
+                        "q -" + r1 + " " + 0 + " -" + r1 + " -" + r1 + " " +
+                        "v -" + (l7 - 2*r1) + " " +
+                        "q " + 0 + " -" + r1 + " " + r1 + " -" + r1 + " " +
+                        "h " + (l9 - r1) + "\n" +
+                        // Übergang zu erster Lasche von oben links
+                        "v -" + mt + "\n" +
+                        // erste Lasche von oben links
+                        "l -" + (l6 - r2) + " -" + (((l4 - l10) / 2) - r2) + " " +
+                        "q -" + r2 + " " + 0 + " -" + r2 + " -" + r2 + " " +
+                        "v -" + l10 + " " +
+                        "q " + 0 + " -" + r2 + " " + r2 + " -" + r2 + " " +
+                        "l " + (l6 - r2) + " -" + (((l4 - l10) / 2) - r2) + "\n" +
+                        // Lasche zum Hochheben des Deckels
+                        "m " + ((l1 / 2) - r3 - mt) + " " + 0 + " " +
+                        "l " + mt + " -" + mt + " " +
+                        "h " + 2*r3 + " " +
+                        "l " + mt + " " + mt + "\n" +
+                        // Loch für linke Lasche
+                        "m -" + (r3 + mt + l1 / 2 + (l9 - (l11 + l12)) - s1) + " " + (l4 + mt + l6 + l8 / 2 - l15 / 2 + r1) + " " +
+                        "v " + (l15 - 2* r1) + " " +
+                        "q " + 0 + " " + r1 + " -" + r1 + " " + r1 + " " +
+                        "h -" + (l16 - r1) + " " +
+                        "v -" + l15 + " " +
+                        "h " + (l16 - r1) + " " +
+                        "q " + r1 + " " + 0 + " " + r1 + " " + r1 + "\n" +
+                        // Loch für die rechte Lasche
+                        "m " + (-s1 + l3 - s1) + " " + 0 + " " +
+                        "v " + (l15 - 2* r1) + " " +
+                        "q " + 0 + " " + r1 + " " + r1 + " " + r1 + " " +
+                        "h " + (l16 - r1) + " " +
+                        "v -" + l15 + " " +
+                        "h -" + (l16 - r1) + " " +
+                        "q -" + r1 + " " + 0 + " -" + r1 + " " + r1;;
+                
+                console.log("CUT\n" + pathDataCut);
+                var pathCut = newSVGElement("path", {d: pathDataCut, stroke: "black", "stroke-width": 0.1, fill: "none"});
+                document.getElementById("svgCanvas").appendChild(pathCut);
+
+                var pathDataEngrave = "m " + svgOrigen.x + " " + svgOrigen.y + " " +
+                        "h " + l1 + " " +
+                        "v " + l4 + " " +
+                        "h -" + l1 + " " +
+                        "v -" + l4 + " " +
+                        "m -" + (mt + s1) + " " + (l4 + mt) + " " +
+                        "v " + l6 + " " +
+                        "m " + (l1 + 2 * (mt + s1)) + " " + 0 + " " +
+                        "v -" + l6 + " " +
+                        "m " + (s1 - mt) + " " + l6 + " " +
+                        "h -" + l3 + " " +
+                        "m -" + 2*s1 + " " + 0 + " " +
+                        "v " + l8 + " " +
+                        "m -" + l11 + " " + 0 + " " +
+                        "v -" + l8 + " " +
+                        "m -" + 2*mt + " " + mt + " " +
+                        "v " + l14 + " " +
+                        "m " + (2*mt + l11 + s1) + " " + mt + " " +
+                        "v " + l6 + " " +
+                        "m " + s1 + " -" + l6 + " " +
+                        "h " + l3 + " " +
+                        "m " + s1 + " " + 0 + " " +
+                        "v " + l6 + " " +
+                        "m " + s1 + " -" + l6 + " " +
+                        "v -" + l8 + " " +
+                        "m " + l11 + " " + 0 + " " +
+                        "v " + l8 + " " +
+                        "m " + 2*mt + " -" + mt + " " +
+                        "v -" + l14;
+
+                console.log("ENGRAVE\n" + pathDataEngrave);
+                var pathEngrave = newSVGElement("path", {d: pathDataEngrave, stroke: "red", "stroke-width": 0.1, fill: "none"});
+                document.getElementById("svgCanvas").appendChild(pathEngrave);
+
+                var pathDataDebug = "m " + svgOrigen.x + " " + svgOrigen.y +
+                        "v -" + ih + " " +
+                        "h " + iw + " " +
+                        "v " + ih + " " +
+                        "h " + ih + " " +
+                        "v " + id + " " +
+                        "h -" + ih + " " +
+                        "v " + mt + " " +
+                        "h " + l9 + " " +
+                        "v " + l6 + " " +
+                        "h -" + l9 + "" +
+                        "m " + (l11 + mt + 2*s1)  + " " + 0 + " " +
+                        "v " + mt + " " +
+                        "h " + l13 + " " +
+                        "v " + l15 + " " +
+                        "h " + l16 + " " +
+                        "v " + l15 + " " +
+                        "h -" + l16 + " " +
+                        "v " + l15 + " " +
+                        "h -" + l13 + " " +
+                        "v " + mt + " " +
+                        "h -" + (l11 + mt + 2*s1) + " " +
+                        "m " + (l11 + mt) + " " + 0 + " " +
+                        "h " + l12 + " " +
+                        "v " + l6 + " " +
+                        "h -" + l9 + " " +
+
+                        "h -" + (l3 - 2*mt) + " " +
+
+                        "h -" + l9 + " " +
+                        "v -" + l6 + " " +
+                        "h " + l12 + " " +
+                        "h " + (l11 + mt ) + " " +
+                        "m -" + (l11 + mt + 2*s1) + " " + 0 + " " +
+                        "v -" + mt + " " +
+                        "h -" + l13 + " " +
+                        "v -" + l15 + " " +
+                        "h -" + l16 + " " +
+                        "v -" + l15 + " " +
+                        "h " + l16 + " " +
+                        "v -" + l15 + " " +
+                        "h " + l13 + " " +
+                        "v -" + mt + " " +
+                        "m " + (l11 + mt + 2*s1)  + " " + 0 + " " +
+                        "h -" + l9 + " " +
+                        "v -" + l6 + " " +
+                        "h " + l9 + " " +
+                        "v -" + mt + " " +
+                        "h -" + ih + " " +
+                        "v -" + id + " " +
+                        "h " + ih + " ";
+
+                var pathDebug = newSVGElement("path", {d: pathDataDebug, stroke: "lime", "stroke-width": 0.1, fill: "none"});
+                //document.getElementById("svgCanvas").appendChild(pathDebug);
+            }
+
+            this.offerSVGDownload = function() {
+                var svgData = 'data:image/svg+xml,' +
+                        '<?xml version="1.0" encoding="UTF-8"?>'+
+                        '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="' + this.maxSheetWidth + 'mm" height="' + this.maxSheetHeight + 'mm" viewBox="0 0 ' + this.maxSheetWidth +  ' ' + this.maxSheetHeight +'">'+
+                        document.getElementById("svgCanvas").innerHTML +
+                        '</svg>';
+
+                var link = newElement("a", {href: svgData, download: "simpleCardboardBox_h=" + this.innerHeight + "_w=" + this.innerWidth + "_d=" + this.innerDepth + "_" + this.materialThickness + "mm.svg"});
+                link.click();
+            }
+        }
+
+        function initSimpleBox() {
+            box = new SimpleBox(masurementsDiv);
+            box.initMeasurmentsForm(masurementsDiv);
+        }
+
+        function init() {
+            masurementsDiv = document.getElementById("measurements");
+
+            // todo: remove after testing
+            initSimpleBox();
+            box.draw();
+        }
+    </script>
+</head>
+<body onload="init()">
+    <h3>Choos a box type:</h3>
+    <span onclick="initSimpleBox();">simple cardboard box</span>
+
+    <h3>Enter measurements:</h3>
+
+    <div id="measurements"></div>
+    <input type="button" value="draw box" onclick="box.draw()"> <input type="button" value="download svg" onclick="box.offerSVGDownload();">
+
+    <h3>svg</h3>
+    <svg xmlns="http://www.w3.org/2000/svg"
+         version="1.1"
+         baseProfile="full"
+         id="svgCanvas"
+         width="100%"
+         height="55em"
+         viewBox="300 0 300 300">
+
+    </svg>
+</body>
+</html>
