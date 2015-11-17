@@ -80,22 +80,22 @@
                 var tdH0 = newElement("td", {}, "height");
                 var tdH1 = newElement("td");
                 var inpH = newElement("input", {type: "input", id: "inpHeight", value: 24});
-                var inpHI = newElement("input", {type: "checkbox", id: "inpUseInnerHeight"});
-                var labHI = newElement("label", {for: "inpUseInnerHeight"}, "use as outer height");
+                var inpHI = newElement("input", {type: "checkbox", id: "inpUseAsOuterHeight"});
+                var labHI = newElement("label", {for: "inpUseAsOuterHeight"}, "use as outer height");
 
                 var tr2 = newElement("tr");
                 var tdW0 = newElement("td", {}, "width");
                 var tdW1 = newElement("td");
                 var inpW = newElement("input", {type: "input", id: "inpWidth", value: 120});
-                var inpWI = newElement("input", {type: "checkbox", id: "inpUseInnerWidth"});
-                var labWI = newElement("label", {for: "inpUseInnerWidth"}, "use as outer width");
+                var inpWI = newElement("input", {type: "checkbox", id: "inpUseAsOuterWidth"});
+                var labWI = newElement("label", {for: "inpUseAsOuterWidth"}, "use as outer width");
 
                 var tr3 = newElement("tr");
                 var tdD0 = newElement("td", {}, "depth");
                 var tdD1 = newElement("td");
                 var inpD = newElement("input", {type: "input", id: "inpDepth", value: 70});
-                var inpDI = newElement("input", {type: "checkbox", id: "inpUseInnerDepth"});
-                var labDI = newElement("label", {for: "inpUseInnerDepth"}, "use as outer depth");
+                var inpDI = newElement("input", {type: "checkbox", id: "inpUseAsOuterDepth"});
+                var labDI = newElement("label", {for: "inpUseAsOuterDepth"}, "use as outer depth");
 
                 var tr4 = newElement("tr");
                 var tdS0 = newElement("td", {}, "minimum sheet size");
@@ -140,10 +140,19 @@
                 document.getElementById("svgCanvas").innerHTML = "";
 
                 // todo: check if input is valid
-                var ih = Number(this.innerHeight = document.getElementById("inpHeight").value);
-                var iw = Number(this.innerWidth = document.getElementById("inpWidth").value);
-                var id = Number(this.innerDepth = document.getElementById("inpDepth").value);
                 var mt = Number(this.materialThickness = document.getElementById("inpThickness").value);
+                var ih = Number(this.innerHeight = document.getElementById("inpHeight").value);
+                if (document.getElementById("inpUseAsOuterHeight").checked) {
+                    ih -= 2 * mt;
+                }
+                var iw = Number(this.innerWidth = document.getElementById("inpWidth").value);
+                if (document.getElementById("inpUseAsOuterWidth").checked) {
+                    iw -= 8 * mt;
+                }
+                var id = Number(this.innerDepth = document.getElementById("inpDepth").value);
+                if (document.getElementById("inpUseAsOuterDepth").checked) {
+                    id -= 3 * mt;
+                }
 
                 console.log("drawing");
 
