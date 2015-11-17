@@ -423,7 +423,7 @@
             }
         }
 
-        function initSimpleBox() {
+        function initSimpleCardboardBox() {
             box = new SimpleCardboardBox(masurementsDiv);
             box.initMeasurmentsForm(masurementsDiv);
         }
@@ -432,14 +432,21 @@
             masurementsDiv = document.getElementById("measurements");
 
             // todo: remove after testing
-            initSimpleBox();
+            initSimpleCardboardBox();
             box.draw();
         }
     </script>
 </head>
 <body onload="init()">
     <h3>Choos a box type:</h3>
-    <span onclick="initSimpleBox();">simple cardboard box</span>
+    <ul>
+        <li>
+            <span onclick="initSimpleCardboardBox();">simple cardboard box</span>
+        </li>
+        <li>
+            <span onclick="initSimpleBox();">simple plywood box</span>
+        </li>
+    </ul>
 
     <h3>Enter measurements:</h3>
 
