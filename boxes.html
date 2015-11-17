@@ -38,6 +38,10 @@
             return elem;
         }
 
+        function removeAllChildren(htmlElement) {
+            while (htmlElement.firstChild) htmlElement.removeChild(htmlElement.firstChild);
+        }
+
         function newElementNS(namespace, type, attributes, text) {
             var elem = document.createElementNS(namespace, type);
             var attrs = attributes || {};
@@ -69,6 +73,8 @@
             this.innerDepth;
 
             this.initMeasurmentsForm = function (parentHTML) {
+                removeAllChildren(parentHTML);
+
                 var table = newElement("table");
 
                 var tr0 = newElement("tr");
